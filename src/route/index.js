@@ -12,9 +12,9 @@ const routes = [
     component: layout ,
     children:[ 
       { path: 'index',fullPath:"/layout/index",label:"首页",name:"index", component: home },
-      { path: 'unityStorage',label:"统一存储",name:"unityStorage", children:[
-        { path: 'virtualDisk',fullPath:"/layout/unityStorage/virtualDisk",name:"virtualDisk",label:"虚拟磁盘", component: ()=>import("../view/unityStorage/virtualDisk/index.vue")},
-        { path: 'virtualStorageGroup',fullPath:"/layout/unityStorage/virtualStorageGroup",name:"virtualStorageGroup",label:"虚拟存储组", component: ()=>import("../view/unityStorage/virtualStorageGroup/index.vue")},
+      { path: 'friends',label:"好友",name:"friends", children:[
+        { path: 'friendManage',fullPath:"/layout/friends/friendManage",name:"friendManage",label:"好友列表", component: ()=>import("../view/friend/friendManage/index.vue")},
+        { path: 'addFriends',fullPath:"/layout/friends/addFriends",name:"addFriends",label:"添加好友", component: ()=>import("../view/friend/addFriends/index.vue")},
       ]},
       
     ]
