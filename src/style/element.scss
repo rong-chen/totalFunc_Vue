@@ -1,0 +1,15 @@
+// element-theme.scss
+
+// 导入 Element Plus 默认样式
+@import 'element-plus/theme-chalk/index.css';
+
+// 自定义主题颜色
+$--color-primary:red;
+// 其他自定义颜色变量
+$--color-success: red;
+$--color-warning: red;
+$--color-danger: red;
+
+// 在这里可以继续覆盖其他样式变量，以满足你的需求
+
+// 编译成 CSS 文件
