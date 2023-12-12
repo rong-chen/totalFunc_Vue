@@ -1,157 +1,87 @@
 <template>
-    <div
-        id="userLayout"
-        :style="{
-            backgroundSize: '100% 100%'
-        }"
-    >
-        <div class="" v-loading="loading">
-            <div class="">
-                <div class="containers">
-                    <div class="container-item loginform">
-                        <div class="textalinge">
-                            <img src="/src/assets/icon.png" class="icon" alt="" />
-                            <h3 class="companyTitle">图腾数安CDM副本数据管理平台</h3>
-                            <el-form
-                                ref="loginForm"
-                                :model="loginFormData"
-                                :rules="rules"
-                                :validate-on-rule-change="false"
-                                @keyup.enter.native="submitForm"
-                            >
-                                <div class="prompt" v-if="showPrompt">
-                                    长时间未操作，请重新登录
-                                </div>
-                                <el-form-item prop="username">
-                                    <el-input
-                                        v-model="loginFormData.username"
-                                        type="text"
-                                        placeholder="账号"
-                                        required=""
-                                    >
-                                        <template #suffix>
-                                            <img
-                                                class="width25"
-                                                src="/src/assets/user.png"
-                                                alt=""
-                                            />
-                                        </template>
-                                    </el-input>
-                                </el-form-item>
-                                <el-form-item prop="password" style="margin-top: 10px">
-                                    <el-input
-                                        v-model="loginFormData.password"
-                                        type="password"
-                                        placeholder="口令"
-                                        required=""
-                                    >
-                                        <template #suffix>
-                                            <img
-                                                class="width25"
-                                                src="/src/assets/password.png"
-                                                alt=""
-                                        /></template>
-                                    </el-input>
-                                </el-form-item>
-                                <div class="form-group">
-                                    <button class="btnLogin" @click.prevent="submitForm">
-                                        登录
-                                    </button>
-                                </div>
-                                <div class="version">
-                                    <div class="">
-                                        <label class="">
-                                            <el-checkbox
-                                                label="记住我"
-                                                style="color: #0051ea"
-                                                v-model="loginFormData.isCheckbox"
-                                            />
-                                        </label>
-                                    </div>
-                                    <div class="">
-                                        <a style="color: #0051ea">{{ branch }}</a>
-                                        <a style="color: #5d85ec">[{{ commitId }}]</a>
-                                    </div>
-                                </div>
-                            </el-form>
-                        </div>
-                    </div>
-                </div>
+    <div class="test-container">
+        <div class="input-model">
+            <div class="title">胖狐聊天室</div>
+            <div style="padding: 10px 20px; margin-top: 10px">
+                <el-form
+                    label-position="left"
+                    label-width="120px"
+                    :rules="rules"
+                    style="width: 460px; margin-top: 30px"
+                    :model="LicenseParams"
+                    ref="ruleFormRef"
+                >
+                    <el-form-item label="账号" prop="deviceSn">
+                        <input
+                            class="form-control"
+                            placeholder="账号"
+                            v-model="LicenseParams.username"
+                            style="width: 280px"
+                        />
+                    </el-form-item>
+                    <el-form-item label="密码" prop="authObj">
+                        <input
+                            class="form-control"
+                            placeholder="密码"
+                            v-model="LicenseParams.password"
+                            style="width: 280px"
+                        />
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <div
+                style="
+                    border-top: 1px solid #cecece;
+                    padding: 10px;
+                    box-sizing: border-box;
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    height: 70px;
+                "
+            >
+                <button class="btn-primary btn">注册</button>
+                <button @click="submit(ruleFormRef)" class="btn-primary btn">登陆</button>
             </div>
         </div>
     </div>
 </template>
-
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { login } from "../../api/login";
-import { userInfo } from "../../store/user";
+import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
+import { userInfo } from "../../store/user/index";
+const user = userInfo();
+
 const router = useRouter();
-let uif = userInfo();
-
-let loading = ref(false);
+const ruleFormRef = ref();
+let LicenseParams = ref({
+    username: "", //设备号
+    password: "" //授权对象
+});
 onMounted(() => {
-    let login = localStorage.getItem("loginInfo");
-    if (login) {
-        loginFormData.value = JSON.parse(login);
+    //
+    if (user.token) {
+        router.push({ path: "/layout/index" });
     }
 });
 
-window.onbeforeunload = function (event) {};
-
-const loginForm = ref(null);
-let loginFormData = ref({
-    username: "",
-    password: "",
-    isCheckbox: false
-});
-
-const checkUsername = (rule, value, callback) => {
-    if (value.length < 0) {
-        return callback(new Error("请输入正确的用户名"));
-    } else {
-        callback();
-    }
-};
-
-const checkPassword = (rule, value, callback) => {
-    if (value.length < 0) {
-        return callback(new Error("请输入正确的密码"));
-    } else {
-        callback();
-    }
-};
 const rules = reactive({
-    username: [{ validator: checkUsername, trigger: "blur" }],
-    password: [{ validator: checkPassword, trigger: "blur" }],
-    captcha: [
-        {
-            message: "验证码格式不正确",
-            trigger: "blur"
-        }
-    ]
+    username: [{ required: true, message: "请填写完整", trigger: "blur" }],
+    password: [{ required: true, message: "请填写完整", trigger: "blur" }]
 });
 
-const submitForm = () => {
-    loginForm.value.validate(async (v) => {
-        if (v) {
-            loading.value = true;
-            login(loginFormData.value).then((res) => {
-                if (loginFormData.value.isCheckbox && res.code == 200) {
-                    localStorage.setItem(
-                        "loginInfo",
-                        JSON.stringify({
-                            username: loginFormData.value.username,
-                            password: loginFormData.value.password,
-                            isCheckbox: true
-                        })
-                    );
-                    //
-                    loading.value = false;
-                }
+const submit = async (formEl) => {
+    if (!formEl) return;
+    await formEl.validate((valid) => {
+        if (valid) {
+            login(LicenseParams.value).then((res) => {
+                console.log(res);
                 if (res.code == 200) {
-                    uif.token = res.data.token;
+                    user.token = res.data.token;
+                    localStorage.setItem("token", res.data.token);
                     router.push({ path: "/layout/index" });
                 }
             });
@@ -160,73 +90,102 @@ const submitForm = () => {
     });
 };
 </script>
-
-<style scoped>
-#userLayout {
-    height: 100%;
-    width: 100%;
-    min-width: 1300px;
-}
-.containers {
-    width: 100%;
-    position: relative;
-    height: 100vh;
-}
-.textalinge {
-    text-align: center;
-}
-.loginform {
-    width: 400px;
-    background-color: white;
-    border-radius: 20px;
-    padding: 30px;
-    position: absolute;
-    top: 50%;
-    right: 10%;
-    transform: translateY(-50%);
-}
-/* 0051ea */
-.companyTitle {
-    color: #0051ea;
-    text-align: center;
-    font-size: 23px;
-    margin-bottom: 30px;
-}
-.icon {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    height: 40px;
-    width: 40px;
-}
-.btnLogin {
-    background-color: white;
-    border: 1px solid #285eec;
-    color: #285eec;
-    width: 100%;
-    height: 40px;
-    border-radius: 3px;
-    margin-top: 20px;
-    /*  */
-}
-.width25 {
-    width: 20px;
-}
-.version {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-.twofactorAuthentication {
-    font-weight: 700;
-}
-.prompt {
-    margin-bottom: 10px;
-    text-align: left;
-    color: rgb(209, 36, 47);
-}
-</style>
 <style>
-#userLayout .el-dialog {
-    border-radius: 3px;
+.test-container .el-input__wrapper.is-focus {
+    color: inherit;
+    background-color: var(--tblr-bg-forms);
+    border-color: #90b5e2;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(32, 107, 196, 0.25);
 }
 </style>
+<style scoped>
+.test-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background-image: url("../../assets/bg1.png");
+    position: relative;
+    justify-content: right;
+    overflow: hidden;
+    background-size: 100% 100%;
+}
+
+.test-container::after {
+    content: "";
+    display: block;
+    position: absolute;
+    right: 0%;
+    bottom: 0%;
+    backdrop-filter: blur(5px);
+    width: 100%;
+    height: 100%;
+}
+
+.input-model {
+    /* width: 30%; */
+    /* text-align: right; */
+    background-color: #ffffff80;
+    z-index: 11;
+    border-radius: 3px;
+    margin: auto;
+    /* min-height: 600px; */
+}
+.input-model .el-input {
+    /* flex: 1; */
+}
+.input-model > div {
+    display: flex;
+    /* align-items: center; */
+    width: 100%;
+    display: flex;
+}
+
+.title {
+    padding: 10px;
+    font-weight: bold;
+    background-color: #707030;
+    box-sizing: border-box;
+    height: 50px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+.licenseCss {
+    display: flex;
+    width: 100%;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    border: 1px solid #dcdfe6;
+    padding: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    line-height: 22px;
+    position: relative;
+    min-height: 150px;
+    color: #737373;
+}
+.licenseCss:hover {
+    display: block;
+    background-color: #f5f7fa;
+}
+.copy {
+    position: relative;
+}
+.positionA {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+.emailLabel {
+    background-color: #e2e2e2 !important;
+    text-align: center;
+}
+.label-item {
+    width: 80px;
+}
+</style>
+<style></style>
